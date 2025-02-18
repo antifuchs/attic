@@ -35,7 +35,7 @@ use crate::error::AtticResult;
 mod tests;
 
 /// An ed25519 keypair for signing.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NixKeypair {
     /// Name of this key.
     name: String,

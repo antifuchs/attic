@@ -73,15 +73,6 @@ pub async fn run(opts: Opts) -> Result<()> {
     };
 
     let mp = MultiProgress::new();
-    let session = Pusher::new(
-        store.clone(),
-        api,
-        cache.to_owned(),
-        cache_config,
-        mp,
-        push_config,
-    )
-    .into_push_session(push_session_config);
 
     let (tx, mut rx) = mpsc::unbounded_channel();
 
@@ -113,7 +104,30 @@ pub async fn run(opts: Opts) -> Result<()> {
                         .collect::<Vec<StorePath>>();
 
                     if !paths.is_empty() {
-                        session.queue_many(paths).unwrap();
+                        let session: crate::push::PushSession = Pusher::new(
+                            store.clone(),
+                            api.clone(),
+                            cache.to_owned(),
+                            cache_config.clone(),
+                            mp.clone(),
+                            push_config.clone(),
+                        )
+                        .into_push_session(push_session_config);
+                        if let Err(error) = session.queue_many(paths.clone()) {
+                            tracing::warn!(%error, ?paths, "Failed to attempt uploading paths");
+                        }
+                        match session.wait().await {
+                            Ok(results) => {
+                                for (path, result) in results {
+                                    if let Err(error) = result {
+                                        tracing::warn!(?path, %error, "Failed to upload store path");
+                                    }
+                                }
+                            }
+                            Err(error) => {
+                                tracing::warn!(%error, "Failed to wait for store path upload results");
+                            }
+                        }
                     }
                 }
             }

@@ -37,7 +37,7 @@ pub struct CreateCacheRequest {
 ///
 /// Specifying `None` means using the default value or
 /// keeping the current value.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CacheConfig {
     /// The keypair of the cache.
     ///
@@ -98,7 +98,7 @@ pub struct CacheConfig {
 }
 
 /// Configuaration of a keypair.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum KeypairConfig {
     /// Use a randomly-generated keypair.
     Generate,
@@ -108,7 +108,7 @@ pub enum KeypairConfig {
 }
 
 /// Configuration of retention period.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RetentionPeriodConfig {
     /// Use the global default.
     Global,
